@@ -5,7 +5,7 @@ FROM $DOCKER_IMG:$DOCKER_VER
 
 ARG DOCKER_VER
 
-ARG PKGS="jq wget nano gcc make which man-pages man-db man zlib readline openssl-libs openssl openssl-devel"
+ARG PKGS="wget nano gcc make which man-pages man-db man zlib readline openssl-libs openssl openssl-devel ncurses m4 gmp-devel unzip"
 
 RUN set -ex;\
     if [ ${DOCKER_VER} = "8" ] ; then \
@@ -34,11 +34,17 @@ RUN set -ex;\
     rm -rf /tmp/*;
 
 # Install Extras
+
+COPY Crypt-Curve25519-0.06.tar.gz /tmp
+
 ENV PATH=/perl/bin:${PATH} 
 
 RUN set -ex;\
     cd /tmp;\
     curl -fsSL https://git.io/cpm | perl - install -g App::cpm;\
+        cpm install -g Crypt-Curve25519-0.06.tar.gz || cpm install -g Crypt::Curve25519;\
+        cpm install -g --show-build-log-on-failure Net::SSH::Perl;\
+        cpm install -g --show-build-log-on-failure Net::SFTP;\
     cpm install -g --no-retry --show-build-log-on-failure Net::SSLeay;\
     cpm install -g --show-build-log-on-failure Net::SFTP::Foreign;\
     cpm install -g --show-build-log-on-failure App::cpanminus;\
