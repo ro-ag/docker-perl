@@ -4,18 +4,24 @@ ARG DOCKER_VER=stream
 FROM $DOCKER_IMG:$DOCKER_VER
 
 ARG DOCKER_VER
+ARG DOCKER_IMG
 
-ARG PKGS="wget nano gcc make which man-pages man-db man zlib readline openssl-libs openssl openssl-devel ncurses m4 gmp-devel unzip"
+ARG PKGS="wget nano gcc make which man-pages man-db man zlib readline openssl-libs openssl openssl-devel ncurses m4 gmp-devel unzip tar"
 
 RUN set -ex;\
-    if [ ${DOCKER_VER} = "8" ] ; then \
+    if [ ${DOCKER_VER} = "8" ];\
+    then \
         cd /etc/yum.repos.d/ ;\
         sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*   ; \
         sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*  ;\
     fi
 
 RUN set -ex;\
-    yum install epel-release -y;\
+    if [ "${DOCKER_IMG}" = "amazonlinux" ]; then \
+        yum install -y 'https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm' ; \
+    else \ 
+        yum install -y epel-release ;\
+    fi ;\
     yum update -y;\
     yum install -y ${PKGS};\
     yum clean all
